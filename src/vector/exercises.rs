@@ -156,3 +156,85 @@ pub fn merge_intervals(intervals: &[(i32, i32)]) -> Vec<(i32, i32)> {
 
     result
 }
+
+/// Given a vector of integers (positive and negative), find the contiguous subarray
+/// with the largest product.
+///
+/// Example:
+/// Input: [-2, 3, -4]
+/// Output: 24 (subarray [3, -4])
+///
+/// Challenge aspects:
+/// - Handle negative numbers
+/// - Handle zeros
+/// - Optimize space complexity
+/// - Handle integer overflow cases
+///
+/// Expected complexity:
+/// Time: O(n)
+/// Space: O(1)
+pub fn max_product(v: &Vec<i32>) -> i32 {
+    if v.is_empty() {
+        return 0;
+    }
+
+    let first = v[0];
+
+    if v.len() == 1 {
+        return first;
+    }
+
+    let mut max = first;
+    let mut min = first;
+    let mut result = first;
+
+    for &num in v.iter().skip(1) {
+        let cur_max = max;
+        let cur_min = min;
+
+        max = num.max(num * cur_max).max(num * cur_min);
+
+        min = num.min(num * cur_max).min(num * cur_min);
+
+        result = result.max(max);
+    }
+
+    result
+}
+
+pub fn max_product_functional(v: &Vec<i32>) -> i32 {
+    #[derive(Clone, Copy)]
+    struct State {
+        max: i32,
+        min: i32,
+        result: i32,
+    }
+
+    v.iter()
+        .skip(1)
+        .fold(
+            // Initial state
+            v.first().map_or(
+                State {
+                    max: 0,
+                    min: 0,
+                    result: 0,
+                },
+                |&first| State {
+                    max: first,
+                    min: first,
+                    result: first,
+                },
+            ),
+            |state, &num| {
+                let new_max = num.max(num * state.max).max(num * state.min);
+                let new_min = num.min(num * state.max).min(num * state.min);
+                State {
+                    max: new_max,
+                    min: new_min,
+                    result: state.result.max(new_max),
+                }
+            },
+        )
+        .result
+}

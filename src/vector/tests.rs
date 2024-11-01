@@ -1,7 +1,9 @@
 // src/vector/tests.rs
 #[cfg(test)]
 mod tests {
-    use crate::vector::{merge_intervals, sliding_window_maximum};
+    use crate::vector::{
+        max_product, max_product_functional, merge_intervals, sliding_window_maximum,
+    };
 
     mod sliding_window_tests {
         use super::*;
@@ -112,6 +114,90 @@ mod tests {
         fn test_unsorted_input() {
             let intervals = vec![(4, 6), (1, 3), (2, 5)];
             assert_eq!(merge_intervals(&intervals), vec![(1, 6)]);
+        }
+    }
+
+    mod max_product_tests {
+        use super::*;
+
+        #[test]
+        fn test_empty_vec() {
+            assert_eq!(max_product(&vec![]), 0);
+        }
+
+        #[test]
+        fn test_single_element() {
+            assert_eq!(max_product(&vec![5]), 5);
+            assert_eq!(max_product(&vec![-3]), -3);
+            assert_eq!(max_product(&vec![0]), 0);
+        }
+
+        #[test]
+        fn test_two_elements() {
+            assert_eq!(max_product(&vec![2, 3]), 6);
+            assert_eq!(max_product(&vec![-2, -3]), 6);
+            assert_eq!(max_product(&vec![-2, 3]), 3);
+        }
+
+        #[test]
+        fn test_three_elements() {
+            assert_eq!(max_product(&vec![2, 3, -2]), 6);
+            assert_eq!(max_product(&vec![-2, 3, -4]), 24);
+            assert_eq!(max_product(&vec![-2, 0, -1]), 0);
+        }
+
+        #[test]
+        fn test_with_zeros() {
+            assert_eq!(max_product(&vec![2, 0, 3]), 3);
+            assert_eq!(max_product(&vec![0, 0, 0]), 0);
+            assert_eq!(max_product(&vec![1, 0, -2]), 1);
+        }
+
+        #[test]
+        fn test_all_negative() {
+            assert_eq!(max_product(&vec![-1, -2, -3]), 6);
+            assert_eq!(max_product(&vec![-1, -2, -3, -4]), 24);
+            assert_eq!(max_product(&vec![-2, -3]), 6);
+        }
+
+        #[test]
+        fn test_mixed_numbers() {
+            assert_eq!(max_product(&vec![2, 3, -2, 4]), 6);
+            assert_eq!(max_product(&vec![-2, 3, -4, 5, -2]), 120);
+            assert_eq!(max_product(&vec![2, -5, -2, -4, 3]), 24);
+        }
+
+        #[test]
+        fn test_alternating_signs() {
+            assert_eq!(max_product(&vec![1, -2, 3, -4, 5]), 120);
+            assert_eq!(max_product(&vec![-1, 2, -3, 4, -5]), 120);
+        }
+
+        #[test]
+        fn test_sequence_with_different_max_positions() {
+            assert_eq!(max_product(&vec![6, 2, -1, 1, 1]), 12);
+            assert_eq!(max_product(&vec![1, 2, 6, 2, 1]), 24);
+            assert_eq!(max_product(&vec![1, 1, -1, 2, 6]), 12);
+        }
+    }
+
+    mod max_product_functional_tests {
+        use super::*;
+
+        #[test]
+        fn test_both_implementations() {
+            let test_cases = vec![
+                (vec![], 0),
+                (vec![1], 1),
+                (vec![2, 3], 6),
+                (vec![-2, 3, -4], 24),
+                (vec![2, 3, -2, 4], 6),
+                (vec![-2, 0, -1], 0),
+            ];
+
+            for (input, expected) in test_cases {
+                assert_eq!(max_product_functional(&input), expected);
+            }
         }
     }
 }
