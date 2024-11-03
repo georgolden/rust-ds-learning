@@ -10,6 +10,8 @@ pub mod hashset;
 pub mod string;
 pub mod vecdeque;
 pub mod vector;
+pub mod array;
+pub mod matrix;
 
 // We don't need to re-export VectorExercises here since it's already
 // public through the vector module
