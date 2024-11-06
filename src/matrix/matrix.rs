@@ -46,9 +46,9 @@ impl std::error::Error for MatrixError {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Matrix {
-    rows: usize,
-    cols: usize,
-    data: Vec<f64>,
+    pub rows: usize,
+    pub cols: usize,
+    pub data: Vec<f64>,
 }
 
 impl Matrix {
