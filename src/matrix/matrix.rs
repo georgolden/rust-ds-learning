@@ -1,48 +1,30 @@
-#[derive(Debug)]
+use thiserror::Error;
+
+#[derive(Error, Debug)]
 pub enum MatrixError {
+    #[error("Invalid dimensions: expected {expected} elements, got {actual}")]
     InvalidCreation {
         expected: usize,
         actual: usize,
     },
+    #[error("Cannot {operation} matrices: left matrix is {left_dims:?}, right matrix is {right_dims:?}")]
     DimensionMismatch {
         operation: &'static str,
         left_dims: (usize, usize),
         right_dims: (usize, usize),
     },
+    #[error("Index out of bounds: tried to access ({row}, {col}) in a {rows}x{cols} matrix")]
     IndexOutOfBounds {
         row: usize,
         col: usize,
         rows: usize,
         cols: usize,
     },
+    #[error("Element ({el}) not found")]
     ElementNotFound {
         el: f64,
     }
 }
-
-impl std::fmt::Display for MatrixError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            MatrixError::InvalidCreation { expected, actual } => {
-                write!(f, "Invalid dimensions: expected {} elements, got {}", 
-                    expected, actual)
-            }
-            MatrixError::DimensionMismatch { operation, left_dims, right_dims } => {
-                write!(f, "Cannot {} matrices: left matrix is {:?}, right matrix is {:?}",
-                    operation, left_dims, right_dims)
-            }
-            MatrixError::IndexOutOfBounds { row, col, rows, cols } => {
-                write!(f, "Index out of bounds: tried to access ({}, {}) in a {}x{} matrix",
-                    row, col, rows, cols)
-            }
-            MatrixError::ElementNotFound { el } => {
-                write!(f, "Element ({}) not found", el)
-            }
-        }
-    }
-}
-
-impl std::error::Error for MatrixError {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Matrix {

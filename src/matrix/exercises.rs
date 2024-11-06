@@ -1,46 +1,19 @@
+use thiserror::Error;
 use crate::matrix::matrix::{Matrix, MatrixError};
-use std::error::Error;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum SearchError {
+    #[error("Matrix must be square, got dimensions {rows}x{cols}")]
     NotSquareMatrix {
         rows: usize,
         cols: usize,
     },
+    #[error("Element {el} not found in sorted matrix")]
     ElementNotFound {
         el: f64,
     },
-    MatrixError(MatrixError),  // Wrap MatrixError to allow conversion
-}
-
-impl std::fmt::Display for SearchError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SearchError::NotSquareMatrix { rows, cols } => {
-                write!(f, "Matrix must be square, got dimensions {}x{}", rows, cols)
-            }
-            SearchError::ElementNotFound { el } => {
-                write!(f, "Element {} not found in sorted matrix", el)
-            }
-            SearchError::MatrixError(err) => write!(f, "Matrix error: {}", err),
-        }
-    }
-}
-
-impl std::error::Error for SearchError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            SearchError::MatrixError(err) => Some(err),
-            _ => None,
-        }
-    }
-}
-
-// Implement From trait to allow ? operator with MatrixError
-impl From<MatrixError> for SearchError {
-    fn from(err: MatrixError) -> Self {
-        SearchError::MatrixError(err)
-    }
+    #[error(transparent)]
+    Matrix(#[from] MatrixError),
 }
 
 /// Finds position of a value in a sorted square matrix (Young tableau).
@@ -55,7 +28,6 @@ impl From<MatrixError> for SearchError {
 /// [7.0, 8.0, 9.0]
 /// ```
 pub fn find_postition_sorted_square_matrix(m: &Matrix, val: f64) -> Result<(usize, usize), SearchError> {
-    // Check if matrix is square
     if m.rows != m.cols {
         return Err(SearchError::NotSquareMatrix {
             rows: m.rows,
@@ -63,15 +35,29 @@ pub fn find_postition_sorted_square_matrix(m: &Matrix, val: f64) -> Result<(usiz
         });
     }
 
-    // Your search implementation
-    for i in 0..m.rows {
-        for j in 0..m.cols {
-            if m.get(i, j)? == val {  // MatrixError will be automatically converted to SearchError
-                return Ok((i, j));
-            }
+    let n = m.rows;
+    if n == 0 {
+        return Err(SearchError::ElementNotFound { el: val });
+    }
+
+    let mut i: usize = 0;
+    let mut j: usize = n - 1;
+
+    while i < n && j < n {
+        let current = m.get(i, j)?;
+        
+        if current == val {
+            return Ok((i, j));
+        }
+        
+        if current > val {
+            if j == 0 { break; }  // prevent underflow
+            j -= 1;
+        } else {
+            i += 1;
         }
     }
-    
+
     Err(SearchError::ElementNotFound { el: val })
 }
 
